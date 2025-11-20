@@ -15,6 +15,7 @@ routes.post('/products', productController.create);
 
 // Rotas de Pedidos
 routes.post('/orders', orderController.store);
+routes.get('/orders', orderController.index);
 
 // Rota de Health Check
 routes.get('/', (req, res) => {

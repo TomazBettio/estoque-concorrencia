@@ -2,6 +2,7 @@
 const db = require('../database/connection');
 
 class OrderService {
+  //criar ordem
   async createOrder({ productId, quantity }) {
     // Inicia a transação e retorna o resultado dela
     return await db.transaction(async (trx) => {
@@ -47,6 +48,20 @@ class OrderService {
         stockRemaining: product.stock - quantity
       };
     });
+  }
+
+  // LISTAR PEDIDOS (COM DADOS DO PRODUTO)
+  async findAll() {
+    return await db('orders')
+      .join('products', 'orders.product_id', '=', 'products.id')
+      .select(
+        'orders.id',
+        'orders.quantity',
+        'orders.created_at',
+        'products.name as product_name', // Alias para não confundir
+        'products.id as product_id'
+      )
+      .orderBy('orders.created_at', 'desc'); // Mais recentes primeiro
   }
 }
 

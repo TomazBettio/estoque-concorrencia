@@ -8,6 +8,7 @@ const createOrderSchema = z.object({
 });
 
 class OrderController {
+  //criar ordem
   async store(req, res) {
     try {
       // Validação Zod
@@ -40,6 +41,17 @@ class OrderController {
 
       console.error(error);
       return res.status(500).json({ error: 'Erro interno do servidor' });
+    }
+  }
+
+  // GET /orders
+  async index(req, res) {
+    try {
+      const orders = await orderService.findAll();
+      return res.json(orders);
+    } catch (error) {
+      console.error('Erro ao listar pedidos:', error);
+      return res.status(500).json({ error: 'Erro interno ao buscar histórico.' });
     }
   }
 }
