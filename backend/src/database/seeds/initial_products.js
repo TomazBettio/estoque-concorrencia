@@ -12,13 +12,13 @@ exports.seed = async function(knex) {
     { 
       id: 1, 
       name: 'Notebook Gamer', 
-      stock: 100, 
+      stock: 5, 
       version: 1 // Essencial para o Lock Otimista funcionar na primeira tentativa
     },
     { 
       id: 2, 
       name: 'Mouse Sem Fio', 
-      stock: 100, 
+      stock: 5, 
       version: 1 
     },
     { 

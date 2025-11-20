@@ -44,7 +44,7 @@
 import { ref, onMounted } from 'vue'
 
 const products = ref([])
-const notification = ref({ message: '', type: '' }) // Para mensagens de sucesso/erro
+const notification = ref({ message: '', type: '' })
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
@@ -63,9 +63,8 @@ const fetchProducts = async () => {
   }
 }
 
-// Função de Comprar
+// Função para comprar um produto
 const buyProduct = async (product) => {
-  // Limpa mensagens anteriores
   notification.value = { message: '', type: '' }
 
   try {
@@ -80,25 +79,38 @@ const buyProduct = async (product) => {
 
     const result = await res.json()
 
-    // TRATAMENTO DOS REQUISITOS DO CASE ---
-    
     if (res.ok) {
-      // Sucesso (201)
-      showNotification(`Sucesso! Compra realizada. Pedido ID: ${result.id}`, 'success')
-      // Atualiza a lista para mostrar o novo estoque
+      // O backend agora retorna { order: { id: ... } }
+      const orderId = result.order?.id || result.id; 
+      
+      showNotification(`Sucesso! Pedido #${orderId} criado.`, 'success')
       await fetchProducts()
     } else {
-      if (res.status === 409) {
-        // Erro de Concorrência (Lock Otimista)
-        showNotification('ERRO DE CONCORRÊNCIA: O estoque mudou enquanto você comprava. Tente novamente.', 'warning')
-      } else if (res.status === 400) {
-        // Erro de estoque insuficiente
-        showNotification(result.error || 'Estoque insuficiente.', 'error')
-      } else {
-        showNotification('Erro ao processar pedido.', 'error')
-      }
+      // TRATAMENTO DE ERROS (Zod + Regra de Negócio)
       
-      // Em caso de erro, atualizamos a lista para o usuário ver o estoque real
+      let errorMsg = 'Erro ao processar pedido.';
+
+      // Se for erro do Zod (Validação de dados)
+      if (result.errors) {
+        // Pega a primeira mensagem de erro do Zod
+        errorMsg = `Dados inválidos: ${result.errors[0].message}`;
+      } 
+      // Se for erro de negócio (Estoque, Concorrência)
+      else if (result.error) {
+        errorMsg = result.error;
+      }
+
+      // Define o tipo de alerta visual
+      const type = res.status === 409 ? 'warning' : 'error';
+      
+      // Se for conflito (409), personaliza a mensagem
+      if (res.status === 409) {
+        errorMsg = 'ERRO DE CONCORRÊNCIA: Alguém comprou antes de você. O estoque foi atualizado.';
+      }
+
+      showNotification(errorMsg, type)
+      
+      // Atualiza a lista para ver o estoque real
       await fetchProducts()
     }
 
