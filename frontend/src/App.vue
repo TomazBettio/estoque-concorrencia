@@ -2,14 +2,10 @@
   <div class="container">
     <header>
       <h1>🛒 Sistema de Compras (Teste Concorrência)</h1>
-      <p class="subtitle">Front-end Vue.js + API Node/SQLite</p>
+      <p class="subtitle">Front-end Vue.js + API Node/Postgres</p>
     </header>
 
-    <NotificationBanner 
-      :message="notification.message" 
-      :type="notification.type" 
-      @clear="notification.message = ''"
-    />
+    <NotificationBanner />
 
     <div class="grid">
       <ProductCard 
@@ -23,83 +19,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import NotificationBanner from './components/NotificationBanner.vue'
 import ProductCard from './components/ProductCard.vue'
+import { useProducts } from './composables/useProducts'
 
-const products = ref([])
-const notification = ref({ message: '', type: '' })
+const { products, fetchProducts, buyProduct } = useProducts()
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-
-const fetchProducts = async () => {
-  try {
-    const res = await fetch(`${API_URL}/products`)
-    const data = await res.json()
-    products.value = data
-  } catch (error) {
-    showNotification('Erro ao conectar com a API. O backend está rodando?', 'error')
-  }
-}
-
-// Função para comprar um produto
-const handleBuy = async ({ product, quantity }) => {
-  notification.value = { message: '', type: '' }
-
-  try {
-    const res = await fetch(`${API_URL}/orders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        productId: product.id,
-        quantity: quantity
-      })
-    })
-
-    const result = await res.json()
-
-    if (res.ok) {
-      // O backend agora retorna { order: { id: ... } }
-      const orderId = result.order?.id || result.id; 
-      
-      showNotification(`Sucesso! Pedido #${orderId} criado.`, 'success')
-      await fetchProducts()
-    } else {
-      // TRATAMENTO DE ERROS (Zod + Regra de Negócio)
-      
-      let errorMsg = 'Erro ao processar pedido.';
-
-      // Se for erro do Zod (Validação de dados)
-      if (result.errors) {
-        // Pega a primeira mensagem de erro do Zod
-        errorMsg = `Dados inválidos: ${result.errors[0].message}`;
-      } 
-      // Se for erro de negócio (Estoque, Concorrência)
-      else if (result.error) {
-        errorMsg = result.error;
-      }
-
-      // Define o tipo de alerta visual
-      const type = res.status === 409 ? 'warning' : 'error';
-      
-      // Se for conflito (409), personaliza a mensagem
-      if (res.status === 409) {
-        errorMsg = 'ERRO DE CONCORRÊNCIA: Alguém comprou antes de você. O estoque foi atualizado.';
-      }
-
-      showNotification(errorMsg, type)
-      
-      // Atualiza a lista para ver o estoque real
-      await fetchProducts()
-    }
-
-  } catch (error) {
-    showNotification('Erro de rede ou servidor offline.', 'error')
-  }
-}
-
-const showNotification = (msg, type) => {
-  notification.value = { message: msg, type: type }
+const handleBuy = ({ product, quantity }) => {
+  buyProduct(product, quantity)
 }
 
 onMounted(() => {

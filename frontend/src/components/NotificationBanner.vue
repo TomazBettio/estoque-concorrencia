@@ -1,8 +1,8 @@
 <template>
   <transition name="slide-fade">
-    <div v-if="message" :class="['notification', type]">
+    <div v-if="notification.message" :class="['notification', notification.type]">
       <div class="content">
-        {{ message }}
+        {{ notification.message }}
       </div>
       <button class="close-btn" @click="clear">&times;</button>
     </div>
@@ -11,27 +11,17 @@
 
 <script setup lang="ts">
 import { watch, onUnmounted } from 'vue'
+import { useNotifications } from '../composables/useNotifications'
 
-const props = defineProps<{
-  message: string
-  type: string
-}>()
-
-const emit = defineEmits<{
-  (e: 'clear'): void
-}>()
+const { notification, clear } = useNotifications()
 
 let timer: ReturnType<typeof setTimeout> | null = null
 
-const clear = () => {
-  emit('clear')
-}
-
-watch(() => props.message, (newMsg) => {
+watch(() => notification.value.message, (newMsg) => {
   if (timer) clearTimeout(timer)
   
   if (newMsg) {
-    const duration = props.type === 'success' ? 3000 : 5000
+    const duration = notification.value.type === 'success' ? 3000 : 5000
     timer = setTimeout(() => {
       clear()
     }, duration)
