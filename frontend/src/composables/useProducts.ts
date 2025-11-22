@@ -16,8 +16,21 @@ export function useProducts() {
     }
   }
 
-  const buyProduct = async (product: any, quantity: number) => {
+  const fetchProduct = async (id: number) => {
+    try {
+      const res = await fetch(`${API_URL}/products/${id}`)
+      const updatedProduct = await res.json()
+      
+      const index = products.value.findIndex(p => p.id === id)
+      if (index !== -1) {
+        products.value[index] = updatedProduct
+      }
+    } catch (error) {
+      console.error('Failed to update single product', error)
+    }
+  }
 
+  const buyProduct = async (product: any, quantity: number) => {
     try {
       const res = await fetch(`${API_URL}/orders`, {
         method: 'POST',
@@ -33,7 +46,7 @@ export function useProducts() {
       if (res.ok) {
         const orderId = result.order?.id || result.id; 
         notify(`Sucesso! Pedido #${orderId} criado.`, 'success')
-        await fetchProducts()
+        await fetchProduct(product.id)
       } else {
         let errorMsg = 'Erro ao processar pedido.';
 
@@ -50,7 +63,7 @@ export function useProducts() {
         }
 
         notify(errorMsg, type)
-        await fetchProducts()
+        await fetchProduct(product.id)
       }
 
     } catch (error) {
