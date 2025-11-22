@@ -8,6 +8,7 @@
     <NotificationBanner 
       :message="notification.message" 
       :type="notification.type" 
+      @clear="notification.message = ''"
     />
 
     <div class="grid">
@@ -99,10 +100,6 @@ const handleBuy = async ({ product, quantity }) => {
 
 const showNotification = (msg, type) => {
   notification.value = { message: msg, type: type }
-  // Limpa msg de sucesso após 3 segundos, mas mantém as de erro
-  if (type === 'success') {
-    setTimeout(() => notification.value = { message: '', type: '' }, 3000)
-  }
 }
 
 onMounted(() => {

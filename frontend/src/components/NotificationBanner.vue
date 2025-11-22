@@ -1,31 +1,94 @@
 <template>
-  <div v-if="message" :class="['notification', type]">
-    {{ message }}
-  </div>
+  <transition name="slide-fade">
+    <div v-if="message" :class="['notification', type]">
+      <div class="content">
+        {{ message }}
+      </div>
+      <button class="close-btn" @click="clear">&times;</button>
+    </div>
+  </transition>
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import { watch, onUnmounted } from 'vue'
+
+const props = defineProps<{
   message: string
   type: string
 }>()
+
+const emit = defineEmits<{
+  (e: 'clear'): void
+}>()
+
+let timer: ReturnType<typeof setTimeout> | null = null
+
+const clear = () => {
+  emit('clear')
+}
+
+watch(() => props.message, (newMsg) => {
+  if (timer) clearTimeout(timer)
+  
+  if (newMsg) {
+    const duration = props.type === 'success' ? 3000 : 5000
+    timer = setTimeout(() => {
+      clear()
+    }, duration)
+  }
+})
+
+onUnmounted(() => {
+  if (timer) clearTimeout(timer)
+})
 </script>
 
 <style scoped>
 .notification {
-  padding: 15px;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  min-width: 300px;
+  max-width: 400px;
+  padding: 15px 20px;
   border-radius: 8px;
-  margin-bottom: 20px;
-  font-weight: bold;
-  text-align: center;
-  animation: fadeIn 0.3s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  font-weight: 500;
 }
-.notification.success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-.notification.error   { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-.notification.warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+.content {
+  margin-right: 10px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.6;
+  padding: 0;
+}
+.close-btn:hover { opacity: 1; }
+
+.notification.success { background-color: #d4edda; color: #155724; border-left: 5px solid #28a745; }
+.notification.error   { background-color: #f8d7da; color: #721c24; border-left: 5px solid #dc3545; }
+.notification.warning { background-color: #fff3cd; color: #856404; border-left: 5px solid #ffc107; }
+
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(20px);
+  opacity: 0;
 }
 </style>
