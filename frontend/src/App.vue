@@ -15,7 +15,7 @@
           :class="{ active: currentView === 'orders' }" 
           @click="currentView = 'orders'"
         >
-          Histórico de ordens
+          Histórico
         </button>
       </div>
     </header>

@@ -1,6 +1,6 @@
 <template>
   <div class="orders-container">
-    <h2>Histórico de Pedidos</h2>
+    <h2>Histórico de ordens</h2>
     <div v-if="orders.length === 0" class="no-orders">
       Nenhum pedido realizado ainda.
     </div>
