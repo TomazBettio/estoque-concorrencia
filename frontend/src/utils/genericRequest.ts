@@ -34,7 +34,7 @@ async function request<T>(url: string, options: RequestOptions = {}): Promise<T>
   return data;
 }
 
-export const api = {
+export const genericRequest = {
   get: <T>(url: string, options?: RequestOptions) => request<T>(url, { ...options, method: 'GET' }),
   post: <T>(url: string, body: any, options?: RequestOptions) => request<T>(url, { ...options, method: 'POST', body }),
   put: <T>(url: string, body: any, options?: RequestOptions) => request<T>(url, { ...options, method: 'PUT', body }),

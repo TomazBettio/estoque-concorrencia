@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { useNotifications } from './useNotifications'
-import { api } from '../utils/api'
+import { genericRequest } from '../utils/genericRequest'
 
 export function useProducts() {
   const products = ref<any[]>([])
@@ -8,7 +8,7 @@ export function useProducts() {
 
   const fetchProducts = async () => {
     try {
-      products.value = await api.get('/products')
+      products.value = await genericRequest.get('/products')
     } catch (error) {
       notify('Erro ao conectar com a API. Verifique a conexão com o backend.', 'error')
     }
@@ -16,7 +16,7 @@ export function useProducts() {
 
   const fetchProduct = async (id: number) => {
     try {
-      const updatedProduct = await api.get(`/products/${id}`)
+      const updatedProduct = await genericRequest.get(`/products/${id}`)
       
       const index = products.value.findIndex(p => p.id === id)
       if (index !== -1) {
@@ -29,7 +29,7 @@ export function useProducts() {
 
   const buyProduct = async (product: any, quantity: number) => {
     try {
-      const result: any = await api.post('/orders', {
+      const result: any = await genericRequest.post('/orders', {
         productId: product.id,
         quantity: quantity
       })
@@ -37,6 +37,7 @@ export function useProducts() {
       const orderId = result.order?.id || result.id; 
       notify(`Sucesso! Pedido #${orderId} criado.`, 'success')
       await fetchProduct(product.id)
+      return true
 
     } catch (error: any) {
       if (error.status) {
@@ -44,7 +45,7 @@ export function useProducts() {
         const type = error.status === 409 ? 'warning' : 'error';
         
         if (error.status === 409) {
-          errorMsg = 'ERRO DE CONCORRÊNCIA: Alguém comprou antes de você. O estoque foi atualizado.';
+          errorMsg = 'Alguém comprou antes de você. O estoque foi atualizado. (Concorrência)';
         }
 
         notify(errorMsg, type)
@@ -52,6 +53,7 @@ export function useProducts() {
       } else {
         notify('Erro de rede ou servidor offline.', 'error')
       }
+      return false
     }
   }
 
