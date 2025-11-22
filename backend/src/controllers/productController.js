@@ -69,7 +69,6 @@ class ProductController {
 
       return res.json(updatedProduct);
     } catch (error) {
-      console.error(error);
       return res.status(500).json({ error: 'Erro ao atualizar produto.' });
     }
   }
@@ -96,7 +95,6 @@ class ProductController {
         });
       }
       
-      console.error(error);
       return res.status(500).json({ error: 'Erro interno ao excluir.' });
     }
   }
@@ -120,7 +118,6 @@ class ProductController {
       return res.status(201).json(newProduct);
 
     } catch (error) {
-      console.error('Erro ao criar produto:', error);
       return res.status(500).json({ error: 'Erro interno ao criar produto.' });
     }
   }

@@ -23,7 +23,7 @@ export function useProducts() {
         products.value[index] = updatedProduct
       }
     } catch (error) {
-      console.error('Falha ao atualizar o produto', error)
+      notify('Falha ao atualizar o produto', 'error')
     }
   }
 

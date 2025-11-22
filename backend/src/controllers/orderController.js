@@ -39,7 +39,6 @@ class OrderController {
         return res.status(mappedError.status).json({ error: mappedError.msg });
       }
 
-      console.error(error);
       return res.status(500).json({ error: 'Erro interno do servidor' });
     }
   }
@@ -47,10 +46,21 @@ class OrderController {
   // GET /orders
   async index(req, res) {
     try {
-      const orders = await orderService.findAll();
-      return res.json(orders);
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+
+      const { data, total } = await orderService.findAll({ page, limit });
+      
+      return res.json({
+        data,
+        meta: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      });
     } catch (error) {
-      console.error('Erro ao listar pedidos:', error);
       return res.status(500).json({ error: 'Erro interno ao buscar histórico.' });
     }
   }

@@ -51,17 +51,26 @@ class OrderService {
   }
 
   // LISTAR PEDIDOS (COM DADOS DO PRODUTO)
-  async findAll() {
-    return await db('orders')
+  async findAll({ page = 1, limit = 10 } = {}) {
+    const offset = (page - 1) * limit;
+
+    const [countResult] = await db('orders').count('id as total');
+    const total = parseInt(countResult.total || 0, 10);
+
+    const data = await db('orders')
       .join('products', 'orders.product_id', '=', 'products.id')
       .select(
         'orders.id',
         'orders.quantity',
         'orders.created_at',
-        'products.name as product_name', // Alias para não confundir
+        'products.name as product_name', 
         'products.id as product_id'
       )
-      .orderBy('orders.created_at', 'desc'); // Mais recentes primeiro
+      .orderBy('orders.created_at', 'desc') // Mais recentes primeiro
+      .limit(limit)
+      .offset(offset);
+
+    return { data, total };
   }
 }
 
