@@ -1,73 +1,57 @@
 import { ref } from 'vue'
 import { useNotifications } from './useNotifications'
+import { api } from '../utils/api'
 
 export function useProducts() {
   const products = ref<any[]>([])
   const { notify } = useNotifications()
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
 
   const fetchProducts = async () => {
     try {
-      const res = await fetch(`${API_URL}/products`)
-      const data = await res.json()
-      products.value = data
+      products.value = await api.get('/products')
     } catch (error) {
-      notify('Erro ao conectar com a API. O backend está rodando?', 'error')
+      notify('Erro ao conectar com a API. Verifique a conexão com o backend.', 'error')
     }
   }
 
   const fetchProduct = async (id: number) => {
     try {
-      const res = await fetch(`${API_URL}/products/${id}`)
-      const updatedProduct = await res.json()
+      const updatedProduct = await api.get(`/products/${id}`)
       
       const index = products.value.findIndex(p => p.id === id)
       if (index !== -1) {
         products.value[index] = updatedProduct
       }
     } catch (error) {
-      console.error('Failed to update single product', error)
+      console.error('Falha ao atualizar o produto', error)
     }
   }
 
   const buyProduct = async (product: any, quantity: number) => {
     try {
-      const res = await fetch(`${API_URL}/orders`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          productId: product.id,
-          quantity: quantity
-        })
+      const result: any = await api.post('/orders', {
+        productId: product.id,
+        quantity: quantity
       })
 
-      const result = await res.json()
+      const orderId = result.order?.id || result.id; 
+      notify(`Sucesso! Pedido #${orderId} criado.`, 'success')
+      await fetchProduct(product.id)
 
-      if (res.ok) {
-        const orderId = result.order?.id || result.id; 
-        notify(`Sucesso! Pedido #${orderId} criado.`, 'success')
-        await fetchProduct(product.id)
-      } else {
-        let errorMsg = 'Erro ao processar pedido.';
-
-        if (result.errors) {
-          errorMsg = `Dados inválidos: ${result.errors[0].message}`;
-        } else if (result.error) {
-          errorMsg = result.error;
-        }
-
-        const type = res.status === 409 ? 'warning' : 'error';
+    } catch (error: any) {
+      if (error.status) {
+        let errorMsg = error.message || 'Erro ao processar pedido.';
+        const type = error.status === 409 ? 'warning' : 'error';
         
-        if (res.status === 409) {
+        if (error.status === 409) {
           errorMsg = 'ERRO DE CONCORRÊNCIA: Alguém comprou antes de você. O estoque foi atualizado.';
         }
 
         notify(errorMsg, type)
         await fetchProduct(product.id)
+      } else {
+        notify('Erro de rede ou servidor offline.', 'error')
       }
-
-    } catch (error) {
-      notify('Erro de rede ou servidor offline.', 'error')
     }
   }
 

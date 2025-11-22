@@ -1,44 +1,38 @@
 <template>
-  <transition name="slide-fade">
-    <div v-if="notification.message" :class="['notification', notification.type]">
-      <div class="content">
-        {{ notification.message }}
+  <div class="notification-container">
+    <transition-group name="list" tag="div">
+      <div 
+        v-for="notification in notifications" 
+        :key="notification.id" 
+        :class="['notification', notification.type]"
+      >
+        <div class="content">
+          {{ notification.message }}
+        </div>
+        <button class="close-btn" @click="remove(notification.id)">&times;</button>
       </div>
-      <button class="close-btn" @click="clear">&times;</button>
-    </div>
-  </transition>
+    </transition-group>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { watch, onUnmounted } from 'vue'
 import { useNotifications } from '../composables/useNotifications'
 
-const { notification, clear } = useNotifications()
-
-let timer: ReturnType<typeof setTimeout> | null = null
-
-watch(() => notification.value.message, (newMsg) => {
-  if (timer) clearTimeout(timer)
-  
-  if (newMsg) {
-    const duration = notification.value.type === 'success' ? 3000 : 5000
-    timer = setTimeout(() => {
-      clear()
-    }, duration)
-  }
-})
-
-onUnmounted(() => {
-  if (timer) clearTimeout(timer)
-})
+const { notifications, remove } = useNotifications()
 </script>
 
 <style scoped>
-.notification {
+.notification-container {
   position: fixed;
   top: 20px;
   right: 20px;
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notification {
   min-width: 300px;
   max-width: 400px;
   padding: 15px 20px;
@@ -48,6 +42,7 @@ onUnmounted(() => {
   align-items: flex-start;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .content {
@@ -70,15 +65,13 @@ onUnmounted(() => {
 .notification.error   { background-color: #f8d7da; color: #721c24; border-left: 5px solid #dc3545; }
 .notification.warning { background-color: #fff3cd; color: #856404; border-left: 5px solid #ffc107; }
 
-.slide-fade-enter-active {
-  transition: all 0.3s ease-out;
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.3s ease;
 }
-.slide-fade-leave-active {
-  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
-}
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateX(20px);
+.list-enter-from,
+.list-leave-to {
   opacity: 0;
+  transform: translateX(30px);
 }
 </style>
