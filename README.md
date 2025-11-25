@@ -1,28 +1,28 @@
-# 📦 Sistema de Estoque com Controle de Concorrência
+# Sistema de Estoque com Controle de Concorrência
 
 Este projeto é uma prova de conceito (PoC) demonstrando um sistema de e-commerce robusto, focado em resolver o problema de **Race Conditions** (Condições de Corrida) no gerenciamento de estoque.
 
 O sistema utiliza **Optimistic Locking** (Bloqueio Otimista) para garantir que o estoque nunca fique negativo, mesmo quando múltiplas requisições tentam comprar o mesmo produto simultaneamente.
 
-## 🚀 Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 ### Backend
 - **Node.js** & **Express**: Servidor API REST.
 - **PostgreSQL**: Banco de dados relacional (hospedado no Neon).
 - **Knex.js**: Query Builder e gerenciador de Migrations/Seeds.
-- **Zod**: Validação rigorosa de dados.
+- **Zod**: Validação de dados.
 - **Dotenv**: Gerenciamento de variáveis de ambiente.
 
 ### Frontend
-- **Vue.js 3** (Composition API): Framework reativo.
-- **Vite**: Build tool ultra-rápido.
-- **TypeScript**: Tipagem estática para maior segurança.
-- **Lucide Vue**: Ícones modernos.
+- **Vue.js 3** (Composition API): Framework.
+- **Vite**: Build tool.
+- **TypeScript**: Tipagem estática.
+- **Lucide Vue**: Ícones.
 - **CSS Nativo**: Estilização customizada e responsiva.
 
 ---
 
-## ⚙️ Instalação e Configuração
+## Instalação e Configuração
 
 ### Pré-requisitos
 - Node.js (v18+)
@@ -75,7 +75,7 @@ O sistema utiliza **Optimistic Locking** (Bloqueio Otimista) para garantir que o
 
 ---
 
-## 🧪 Testando a Concorrência
+## Testando a Concorrência
 
 O projeto inclui scripts específicos para simular ataques de concorrência e validar a robustez do sistema.
 
@@ -98,7 +98,7 @@ node backend/test-concurrency-pill.js
 
 ---
 
-## 📚 Documentação da API
+## Documentação da API
 
 ### Produtos
 
@@ -117,7 +117,7 @@ node backend/test-concurrency-pill.js
 
 ---
 
-## 🗂️ Estrutura do Banco de Dados
+## Estrutura do Banco de Dados
 
 ```mermaid
 erDiagram
