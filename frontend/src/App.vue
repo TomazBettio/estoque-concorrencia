@@ -27,11 +27,12 @@
         v-for="product in products" 
         :key="product.id" 
         :product="product"
-        @buy="handleBuy"
       />
     </div>
 
     <OrdersList v-else />
+    
+    <Cart />
   </div>
 </template>
 
@@ -40,20 +41,14 @@ import { ref, onMounted } from 'vue'
 import NotificationBanner from './components/NotificationBanner.vue'
 import ProductCard from './components/ProductCard.vue'
 import OrdersList from './components/OrdersList.vue'
+import Cart from './components/Cart.vue'
 import { useProducts } from './composables/useProducts'
 import { useOrders } from './composables/useOrders'
 
-const { products, fetchProducts, buyProduct } = useProducts()
+const { products, fetchProducts } = useProducts()
 const { fetchOrders } = useOrders()
 
 const currentView = ref('products')
-
-const handleBuy = async ({ product, quantity }) => {
-  const success = await buyProduct(product, quantity)
-  if (success) {
-    await fetchOrders()
-  }
-}
 
 onMounted(() => {
   fetchProducts()

@@ -3,49 +3,66 @@ const db = require('../database/connection');
 
 class OrderService {
   //criar ordem
-  async createOrder({ productId, quantity }) {
+  async createOrder({ items }) {
     // Inicia a transação e retorna o resultado dela
     return await db.transaction(async (trx) => {
       
-      // Busca Produto
-      const product = await trx('products').where({ id: productId }).first();
-
-      if (!product) {
-        throw new Error('PRODUCT_NOT_FOUND');
-      }
-
-      // Valida Estoque (Regra de Negócio)
-      if (product.stock < quantity) {
-        throw new Error('INSUFFICIENT_STOCK');
-      }
-
-      // Atualiza com Lock Otimista
-      const rowsAffected = await trx('products')
-        .where({ 
-          id: productId, 
-          version: product.version 
-        })
-        .update({
-          stock: product.stock - quantity,
-          version: product.version + 1
-        });
-
-      if (rowsAffected === 0) {
-        throw new Error('CONCURRENCY_CONFLICT');
-      }
-
-      // Cria Pedido
+      // Cria o Pedido (Header)
       const [order] = await trx('orders')
         .insert({
-          product_id: productId,
-          quantity
+          status: 'completed',
+          total: 0 
         })
-        .returning(['id', 'product_id', 'quantity', 'created_at']); // Postgres suporta returning
+        .returning(['id', 'created_at', 'status']);
 
-      // Retorna objeto puro
+      const orderItems = [];
+
+      for (const item of items) {
+        const { productId, quantity } = item;
+
+        // Busca Produto
+        const product = await trx('products').where({ id: productId }).first();
+
+        if (!product) {
+          throw new Error('PRODUCT_NOT_FOUND');
+        }
+
+        // Valida Estoque (Regra de Negócio)
+        if (product.stock < quantity) {
+          throw new Error('INSUFFICIENT_STOCK');
+        }
+
+        // Atualiza com Lock Otimista
+        const rowsAffected = await trx('products')
+          .where({ 
+            id: productId, 
+            version: product.version 
+          })
+          .update({
+            stock: product.stock - quantity,
+            version: product.version + 1
+          });
+
+        if (rowsAffected === 0) {
+          throw new Error('CONCURRENCY_CONFLICT');
+        }
+
+        // Adiciona Item
+        const [orderItem] = await trx('order_items')
+          .insert({
+            order_id: order.id,
+            product_id: productId,
+            quantity,
+            price: 0 
+          })
+          .returning('*');
+        
+        orderItems.push(orderItem);
+      }
+
       return {
         order,
-        stockRemaining: product.stock - quantity
+        items: orderItems
       };
     });
   }
@@ -58,19 +75,31 @@ class OrderService {
     const total = parseInt(countResult.total || 0, 10);
 
     const data = await db('orders')
-      .join('products', 'orders.product_id', '=', 'products.id')
-      .select(
-        'orders.id',
-        'orders.quantity',
-        'orders.created_at',
-        'products.name as product_name', 
-        'products.id as product_id'
-      )
-      .orderBy('orders.created_at', 'desc') // Mais recentes primeiro
+      .select('*')
+      .orderBy('created_at', 'desc')
       .limit(limit)
       .offset(offset);
 
-    return { data, total };
+    // Fetch items for these orders
+    const orderIds = data.map(o => o.id);
+    let items = [];
+    
+    if (orderIds.length > 0) {
+        items = await db('order_items')
+            .whereIn('order_id', orderIds)
+            .join('products', 'order_items.product_id', '=', 'products.id')
+            .select('order_items.*', 'products.name as product_name');
+    }
+
+    // Attach items to orders
+    const dataWithItems = data.map(order => {
+        return {
+            ...order,
+            items: items.filter(i => i.order_id === order.id)
+        };
+    });
+
+    return { data: dataWithItems, total };
   }
 }
 

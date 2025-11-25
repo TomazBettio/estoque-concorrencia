@@ -4,26 +4,26 @@
     <div v-if="orders.length === 0" class="no-orders">
       Nenhum pedido realizado ainda.
     </div>
-    <table v-else class="orders-table">
-      <thead>
-        <tr>
-          <th>ID da Ordem</th>
-          <th>Produto ID</th>
-          <th>Nome</th>
-          <th>Quantidade</th>
-          <th>Data</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="order in orders" :key="order.id">
-          <td>{{ order.id }}</td>
-          <td>{{ order.product_id }}</td>
-          <td>{{ order.product_name }}</td>
-          <td>{{ order.quantity }}</td>
-          <td>{{ new Date(order.created_at).toLocaleString() }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="orders-list">
+      <div v-for="order in orders" :key="order.id" class="order-card">
+        <div class="order-header">
+          <span class="order-id">Pedido #{{ order.id }}</span>
+          <span class="order-date">{{ new Date(order.created_at).toLocaleString() }}</span>
+          <span class="status-badge" :class="order.status">{{ order.status }}</span>
+        </div>
+        
+        <div class="order-items">
+          <div v-for="item in order.items" :key="item.id" class="order-item">
+            <span class="item-name">{{ item.product_name }}</span>
+            <span class="item-qty">x{{ item.quantity }}</span>
+          </div>
+        </div>
+        
+        <div class="order-total" v-if="order.total > 0">
+          Total: R$ {{ order.total }}
+        </div>
+      </div>
+    </div>
 
     <div v-if="totalPages > 1" class="pagination">
       <button 
@@ -74,34 +74,57 @@ h2 {
   color: #2c3e50;
 }
 
-.orders-table {
-  width: 100%;
-  border-collapse: collapse;
+.orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
-.orders-table th,
-.orders-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #eee;
+.order-card {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 15px;
+  background: #fff;
 }
 
-.orders-table th {
-  background-color: #f8f9fa;
-  font-weight: 600;
-  color: #666;
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f5f5f5;
 }
+
+.order-id { font-weight: bold; color: #2c3e50; }
+.order-date { color: #666; font-size: 0.9rem; }
+
+.order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.order-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+}
+
+.item-name { color: #333; }
+.item-qty { color: #666; font-weight: 500; }
 
 .status-badge {
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  font-weight: 600;
 }
 
 .status-badge.completed {
-  background-color: #d4edda;
-  color: #155724;
+  background-color: #d1fae5;
+  color: #065f46;
 }
 
 .no-orders {

@@ -36,7 +36,7 @@
           @click="handleBuy" 
           :disabled="product.stock === 0 || buyQty < 1"
         >
-          {{ product.stock === 0 ? 'Esgotado' : 'Comprar' }}
+          {{ product.stock === 0 ? 'Esgotado' : 'Adicionar ao Pedido' }}
         </button>
       </div>
     </div>
@@ -46,6 +46,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { ChevronDown, ChevronUp } from 'lucide-vue-next'
+import { useCart } from '../composables/useCart'
 
 const props = defineProps<{
   product: {
@@ -60,6 +61,8 @@ const emit = defineEmits<{
   (e: 'buy', payload: { product: typeof props.product, quantity: number }): void
 }>()
 
+const { addToCart } = useCart()
+
 const buyQty = ref(1)
 const showDescription = ref(false)
 
@@ -68,7 +71,9 @@ const showDescription = ref(false)
 // Actually, keeping it as 1 is fine.
 
 const handleBuy = () => {
-  emit('buy', { product: props.product, quantity: buyQty.value })
+  addToCart(props.product, buyQty.value)
+  buyQty.value = 1 // Reset quantity
+  // Optional: Show toast notification
 }
 </script>
 

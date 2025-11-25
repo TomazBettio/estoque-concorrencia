@@ -3,8 +3,10 @@ const orderService = require('../services/orderService');
 
 // Schema de Validação
 const createOrderSchema = z.object({
-  productId: z.number({ required_error: "ID do produto é obrigatório" }).int().positive(),
-  quantity: z.number({ required_error: "Quantidade é obrigatória" }).int().positive()
+  items: z.array(z.object({
+    productId: z.number({ required_error: "ID do produto é obrigatório" }).int().positive(),
+    quantity: z.number({ required_error: "Quantidade é obrigatória" }).int().positive()
+  })).min(1, "O pedido deve ter pelo menos um item")
 });
 
 class OrderController {
@@ -12,10 +14,10 @@ class OrderController {
   async store(req, res) {
     try {
       // Validação Zod
-      const { productId, quantity } = createOrderSchema.parse(req.body);
+      const { items } = createOrderSchema.parse(req.body);
 
       // Chama Service
-      const result = await orderService.createOrder({ productId, quantity });
+      const result = await orderService.createOrder({ items });
 
       // Sucesso
       return res.status(201).json(result);
