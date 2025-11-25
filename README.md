@@ -145,3 +145,17 @@ erDiagram
         integer quantity
     }
 ```
+
+---
+
+## Melhorias Futuras
+
+Devido ao tempo limitado proposto para este case, algumas otimizações de arquitetura para altíssima escala não foram implementadas, mas são recomendadas para uma evolução do produto:
+
+1.  **Redis como Middleware de Estoque (Pattern de Reserva)**:
+    *   Utilizar Redis para decrementar o estoque atomicamente em memória antes de persistir no banco relacional.
+    *   **Benefício**: Reduz drasticamente a carga no PostgreSQL e elimina a latência de rejeições por concorrência.
+
+2.  **Arquitetura Assíncrona com Filas (BullMQ/RabbitMQ)**:
+    *   Implementar filas para serializar as requisições de compra em momentos de pico (ex: Black Friday).
+    *   **Benefício**: Garante que todas as requisições sejam processadas na ordem de chegada e elimina a necessidade de *retries* do cliente causados pelo Optimistic Locking, melhorando a experiência do usuário.
