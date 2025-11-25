@@ -1,10 +1,24 @@
 <template>
   <div class="card" :class="{ 'disabled': product.stock === 0 }">
     <div class="card-header">
-      <h3>{{ product.name }}</h3>
+      <div class="header-content">
+        <h3>{{ product.name }}</h3>
+        <button 
+          class="toggle-btn" 
+          @click="showDescription = !showDescription"
+          :aria-expanded="showDescription"
+          v-if="product.description"
+        >
+          <component :is="showDescription ? ChevronUp : ChevronDown" :size="20" />
+        </button>
+      </div>
       <span class="badge" :class="product.stock > 0 ? 'in-stock' : 'out-stock'">
         Estoque: {{ product.stock }}
       </span>
+    </div>
+
+    <div v-if="showDescription && product.description" class="product-description">
+      <p>{{ product.description }}</p>
     </div>
 
     <div class="card-body">
@@ -18,6 +32,7 @@
           :disabled="product.stock === 0"
         >
         <button 
+          class="buy-btn"
           @click="handleBuy" 
           :disabled="product.stock === 0 || buyQty < 1"
         >
@@ -30,12 +45,14 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { ChevronDown, ChevronUp } from 'lucide-vue-next'
 
 const props = defineProps<{
   product: {
     id: number
     name: string
     stock: number
+    description?: string
   }
 }>()
 
@@ -44,6 +61,7 @@ const emit = defineEmits<{
 }>()
 
 const buyQty = ref(1)
+const showDescription = ref(false)
 
 // Reset quantity when stock changes to 0 or component re-mounts if needed, 
 // but mainly we just want to ensure it's valid. 
@@ -69,10 +87,40 @@ const handleBuy = () => {
 .card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 15px;
 }
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .card-header h3 { margin: 0; font-size: 1.1rem; }
+
+.toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 0.8rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  flex: 0 0 auto; /* Prevent shrinking */
+  width: auto; /* Override default button width */
+}
+.toggle-btn:hover { background: none; color: #333; }
+
+.product-description {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #555;
+}
 
 .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
 .in-stock { background-color: #e6fffa; color: #2c7a7b; }
@@ -88,7 +136,7 @@ input {
   text-align: center;
 }
 
-button {
+.buy-btn {
   flex: 1;
   padding: 10px;
   background-color: #3b82f6;
@@ -99,6 +147,6 @@ button {
   font-weight: 600;
   transition: background 0.2s;
 }
-button:hover:not(:disabled) { background-color: #2563eb; }
-button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+.buy-btn:hover:not(:disabled) { background-color: #2563eb; }
+.buy-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
 </style>

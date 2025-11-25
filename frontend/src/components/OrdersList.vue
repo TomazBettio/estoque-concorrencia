@@ -1,14 +1,15 @@
 <template>
   <div class="orders-container">
-    <h2>Histórico de ordens</h2>
+    <h2>Histórico de pedidos</h2>
     <div v-if="orders.length === 0" class="no-orders">
       Nenhum pedido realizado ainda.
     </div>
     <table v-else class="orders-table">
       <thead>
         <tr>
-          <th>ID</th>
+          <th>ID da Ordem</th>
           <th>Produto ID</th>
+          <th>Nome</th>
           <th>Quantidade</th>
           <th>Data</th>
         </tr>
@@ -17,6 +18,7 @@
         <tr v-for="order in orders" :key="order.id">
           <td>{{ order.id }}</td>
           <td>{{ order.product_id }}</td>
+          <td>{{ order.product_name }}</td>
           <td>{{ order.quantity }}</td>
           <td>{{ new Date(order.created_at).toLocaleString() }}</td>
         </tr>
