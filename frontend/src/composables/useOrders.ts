@@ -39,7 +39,7 @@ export function useOrders() {
       notify('Pedido realizado com sucesso!', 'success')
       fetchOrders()
     } catch (error: any) {
-      notify(error.response?.data?.error || 'Erro ao criar pedido.', 'error')
+      notify(error.data?.error || 'Erro ao criar pedido.', 'error')
       throw error
     }
   }

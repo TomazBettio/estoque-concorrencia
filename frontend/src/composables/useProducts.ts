@@ -2,8 +2,9 @@ import { ref } from 'vue'
 import { useNotifications } from './useNotifications'
 import { genericRequest } from '../utils/genericRequest'
 
+const products = ref<any[]>([])
+
 export function useProducts() {
-  const products = ref<any[]>([])
   const { notify } = useNotifications()
 
   const fetchProducts = async () => {

@@ -24,10 +24,6 @@
         {{ isSubmitting ? 'Processando...' : 'Finalizar Pedido' }}
       </button>
     </div>
-    
-    <div v-if="errorMessage" class="error-msg">
-      {{ errorMessage }}
-    </div>
   </div>
 </template>
 
@@ -35,9 +31,11 @@
 import { ref } from 'vue'
 import { useCart } from '../composables/useCart'
 import { useOrders } from '../composables/useOrders'
+import { useProducts } from '../composables/useProducts'
 
 const { items, totalItems, removeFromCart, clearCart } = useCart()
-const { createOrder } = useOrders() // We need to update useOrders too
+const { createOrder } = useOrders()
+const { fetchProducts } = useProducts()
 
 const isSubmitting = ref(false)
 const errorMessage = ref('')
@@ -56,6 +54,7 @@ const finalizeOrder = async () => {
     }))
 
     await createOrder(orderItems)
+    await fetchProducts()
     
     clearCart()
   } catch (error: any) {

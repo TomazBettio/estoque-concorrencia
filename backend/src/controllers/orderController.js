@@ -31,7 +31,7 @@ class OrderController {
       // Mapeamento de Erros de Negócio
       const errorMap = {
         'PRODUCT_NOT_FOUND': { status: 404, msg: 'Produto não encontrado' },
-        'INSUFFICIENT_STOCK': { status: 400, msg: 'Estoque insuficiente' },
+        'INSUFFICIENT_STOCK': { status: 400, msg: 'Estoque insuficiente, verifique a quantidade selecionada.' },
         'CONCURRENCY_CONFLICT': { status: 409, msg: 'Conflito de estoque. Tente novamente.' }
       };
 
