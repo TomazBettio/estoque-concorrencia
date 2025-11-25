@@ -15,7 +15,7 @@
     </div>
 
     <div class="card-actions">
-      <div class="qty-row">
+      <div v-if="product.stock > 0" class="qty-row">
         <label>Quantidade:</label>
         <input 
           type="number" 
@@ -28,7 +28,8 @@
       </div>
       
       <div class="btn-group">
-        <button 
+        <button
+          v-if="product.stock > 0"
           class="btn btn-primary"
           @click="handleBuy" 
           :disabled="product.stock === 0 || buyQty < 1"
@@ -50,7 +51,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ChevronDown, ChevronUp } from 'lucide-vue-next'
 import { useCart } from '../composables/useCart'
 import { useOrders } from '../composables/useOrders'
 import { useProducts } from '../composables/useProducts'
@@ -73,16 +73,10 @@ const { createOrder } = useOrders()
 const { fetchProducts } = useProducts()
 
 const buyQty = ref(1)
-const showDescription = ref(false)
-
-// Reset quantity when stock changes to 0 or component re-mounts if needed, 
-// but mainly we just want to ensure it's valid. 
-// Actually, keeping it as 1 is fine.
 
 const handleBuy = () => {
   addToCart(props.product, buyQty.value)
   buyQty.value = 1 // Reset quantity
-  // Optional: Show toast notification
 }
 
 const handleDirectBuy = async () => {

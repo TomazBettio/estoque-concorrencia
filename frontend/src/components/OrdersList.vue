@@ -15,7 +15,7 @@
         <div class="order-items">
           <div v-for="item in order.items" :key="item.id" class="order-item">
             <span class="item-name">{{ item.product_name }}</span>
-            <span class="item-qty">{{ item.quantity }}</span>
+            <span class="item-qty"><strong>Qtd:</strong> {{ item.quantity }}</span>
           </div>
         </div>
       </div>
