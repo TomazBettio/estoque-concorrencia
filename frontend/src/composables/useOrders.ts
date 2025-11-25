@@ -36,7 +36,7 @@ export function useOrders() {
   const createOrder = async (items: any[]) => {
     try {
       await genericRequest.post('/orders', { items })
-      notify('Pedido realizado com sucesso!', 'success')
+      notify('Pedido realizado com sucesso.', 'success')
       fetchOrders()
     } catch (error: any) {
       notify(error.data?.error || 'Erro ao criar pedido.', 'error')

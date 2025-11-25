@@ -11,7 +11,9 @@
           <span class="item-name">{{ item.name }}</span>
           <span class="item-qty">x{{ item.quantity }}</span>
         </div>
-        <button @click="removeFromCart(item.productId)" class="remove-btn">×</button>
+        <button @click="removeFromCart(item.productId)" class="remove-btn" title="Remover item">
+          <Trash2 :size="18" />
+        </button>
       </li>
     </ul>
 
@@ -29,6 +31,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { Trash2 } from 'lucide-vue-next'
 import { useCart } from '../composables/useCart'
 import { useOrders } from '../composables/useOrders'
 import { useProducts } from '../composables/useProducts'
@@ -126,7 +129,15 @@ const finalizeOrder = async () => {
   color: #ff4d4f;
   font-size: 1.2rem;
   cursor: pointer;
-  padding: 0 5px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+.remove-btn:hover {
+  background-color: #fff5f5;
 }
 
 .finalize-btn {

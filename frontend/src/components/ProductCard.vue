@@ -12,8 +12,11 @@
           <component :is="showDescription ? ChevronUp : ChevronDown" :size="20" />
         </button>
       </div>
-      <span class="badge" :class="product.stock > 0 ? 'in-stock' : 'out-stock'">
-        Estoque: {{ product.stock }}
+      <span v-if="product.stock > 0" class="badge in-stock">
+        Disponível: {{ product.stock }}
+      </span>
+      <span v-else class="badge out-stock">
+        Esgotado
       </span>
     </div>
 
@@ -38,6 +41,14 @@
         >
           {{ product.stock === 0 ? 'Esgotado' : 'Adicionar ao Pedido' }}
         </button>
+        <button 
+          class="direct-buy-btn"
+          @click="handleDirectBuy" 
+          :disabled="product.stock === 0 || buyQty < 1"
+          v-if="product.stock > 0"
+        >
+          Comprar Agora
+        </button>
       </div>
     </div>
   </div>
@@ -47,6 +58,8 @@
 import { ref } from 'vue'
 import { ChevronDown, ChevronUp } from 'lucide-vue-next'
 import { useCart } from '../composables/useCart'
+import { useOrders } from '../composables/useOrders'
+import { useProducts } from '../composables/useProducts'
 
 const props = defineProps<{
   product: {
@@ -62,6 +75,8 @@ const emit = defineEmits<{
 }>()
 
 const { addToCart } = useCart()
+const { createOrder } = useOrders()
+const { fetchProducts } = useProducts()
 
 const buyQty = ref(1)
 const showDescription = ref(false)
@@ -74,6 +89,19 @@ const handleBuy = () => {
   addToCart(props.product, buyQty.value)
   buyQty.value = 1 // Reset quantity
   // Optional: Show toast notification
+}
+
+const handleDirectBuy = async () => {
+  try {
+    await createOrder([{
+      productId: props.product.id,
+      quantity: buyQty.value
+    }])
+    await fetchProducts()
+    buyQty.value = 1
+  } catch (error) {
+    console.error('Direct buy failed', error)
+  }
 }
 </script>
 
@@ -143,15 +171,28 @@ input {
 
 .buy-btn {
   flex: 1;
-  padding: 10px;
+  padding: 8px;
   background-color: #3b82f6;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 400;
   transition: background 0.2s;
 }
 .buy-btn:hover:not(:disabled) { background-color: #2563eb; }
 .buy-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+
+.direct-buy-btn {
+  flex: 1;
+  padding: 8px;
+  background-color: #10b981; /* Emerald 500 */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 400;
+  transition: background 0.2s;
+}
+.direct-buy-btn:hover:not(:disabled) { background-color: #059669; }
 </style>

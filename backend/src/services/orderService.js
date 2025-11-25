@@ -52,8 +52,7 @@ class OrderService {
           .insert({
             order_id: order.id,
             product_id: productId,
-            quantity,
-            price: 0 
+            quantity
           })
           .returning('*');
         

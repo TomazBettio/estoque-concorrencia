@@ -4,7 +4,6 @@ export interface CartItem {
   productId: number
   name: string
   quantity: number
-  price?: number // Optional for now
 }
 
 const items = ref<CartItem[]>([])
