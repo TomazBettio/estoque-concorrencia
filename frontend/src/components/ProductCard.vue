@@ -1,53 +1,47 @@
 <template>
   <div class="card" :class="{ 'disabled': product.stock === 0 }">
-    <div class="card-header">
-      <div class="header-content">
+    <div class="card-content">
+      <div class="header-row">
         <h3>{{ product.name }}</h3>
-        <button 
-          class="toggle-btn" 
-          @click="showDescription = !showDescription"
-          :aria-expanded="showDescription"
-          v-if="product.description"
-        >
-          <component :is="showDescription ? ChevronUp : ChevronDown" :size="20" />
-        </button>
+        <span v-if="product.stock > 0" class="badge in-stock">
+          Disponível: {{ product.stock }}
+        </span>
+        <span v-else class="badge out-stock">Esgotado</span>
       </div>
-      <span v-if="product.stock > 0" class="badge in-stock">
-        Disponível: {{ product.stock }}
-      </span>
-      <span v-else class="badge out-stock">
-        Esgotado
-      </span>
+
+      <div class="description">
+        {{ product.description }}
+      </div>
     </div>
 
-    <div v-if="showDescription && product.description" class="product-description">
-      <p>{{ product.description }}</p>
-    </div>
-
-    <div class="card-body">
-      <label>Quantidade:</label>
-      <div class="input-group">
+    <div class="card-actions">
+      <div class="qty-row">
+        <label>Quantidade:</label>
         <input 
           type="number" 
           v-model="buyQty" 
           min="1" 
           :max="product.stock"
           :disabled="product.stock === 0"
+          class="qty-input"
         >
+      </div>
+      
+      <div class="btn-group">
         <button 
-          class="buy-btn"
+          class="btn btn-primary"
           @click="handleBuy" 
           :disabled="product.stock === 0 || buyQty < 1"
         >
-          {{ product.stock === 0 ? 'Esgotado' : 'Adicionar ao Pedido' }}
+          Adicionar ao pedido
         </button>
         <button 
-          class="direct-buy-btn"
-          @click="handleDirectBuy" 
-          :disabled="product.stock === 0 || buyQty < 1"
           v-if="product.stock > 0"
+          class="btn btn-success"
+          @click="handleDirectBuy" 
+          :disabled="buyQty < 1"
         >
-          Comprar Agora
+          Comprar agora
         </button>
       </div>
     </div>
@@ -107,92 +101,144 @@ const handleDirectBuy = async () => {
 
 <style scoped>
 .card {
-  border: 1px solid #e1e4e8;
-  border-radius: 12px;
-  padding: 20px;
-  background: white;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-  transition: transform 0.2s;
-}
-.card:hover { transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.1); }
-.card.disabled { opacity: 0.7; background-color: #f9f9f9; }
-
-.card-header {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 1rem;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 15px;
+  flex-direction: column;
+  gap: 1rem;
 }
-.header-content {
+
+.card.disabled {
+  opacity: 0.7;
+  background-color: #f8fafc;
+}
+
+/* Desktop: Horizontal Layout */
+@media (min-width: 640px) {
+  .card {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+}
+
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.header-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
-.card-header h3 { margin: 0; font-size: 1.1rem; }
+
+.header-row h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
 
 .toggle-btn {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
-  font-size: 0.8rem;
-  color: #666;
+  padding: 0.25rem;
+  color: var(--text-muted);
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: color 0.2s;
-  flex: 0 0 auto; /* Prevent shrinking */
-  width: auto; /* Override default button width */
 }
-.toggle-btn:hover { background: none; color: #333; }
 
-.product-description {
-  margin-bottom: 15px;
-  padding: 10px;
-  background-color: #f8f9fa;
-  border-radius: 6px;
+.badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.in-stock { background-color: #dcfce7; color: #166534; }
+.out-stock { background-color: #fee2e2; color: #991b1b; }
+
+.description {
   font-size: 0.9rem;
-  color: #555;
+  color: var(--text-muted);
+  background: #f8fafc;
+  padding: 0.5rem;
+  border-radius: 4px;
 }
 
-.badge { padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; }
-.in-stock { background-color: #e6fffa; color: #2c7a7b; }
-.out-stock { background-color: #fff5f5; color: #c53030; }
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 200px;
+}
 
-.input-group { display: flex; gap: 10px; }
+.qty-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
 
-input {
-  width: 60px;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+.qty-input {
+  width: 3.5rem;
+  padding: 0.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
   text-align: center;
 }
 
-.buy-btn {
-  flex: 1;
-  padding: 8px;
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 400;
-  transition: background 0.2s;
+.btn-group {
+  display: flex;
+  gap: 0.5rem;
 }
-.buy-btn:hover:not(:disabled) { background-color: #2563eb; }
-.buy-btn:disabled { background-color: #bdc3c7; cursor: not-allowed; }
 
-.direct-buy-btn {
+.btn {
   flex: 1;
-  padding: 8px;
-  background-color: #10b981; /* Emerald 500 */
-  color: white;
-  border: none;
-  border-radius: 6px;
+  padding: 0.5rem;
+  border-radius: var(--radius);
   cursor: pointer;
-  font-weight: 400;
-  transition: background 0.2s;
+  font-weight: 500;
+  border: 1px solid transparent;
+  white-space: nowrap;
 }
-.direct-buy-btn:hover:not(:disabled) { background-color: #059669; }
+
+.btn-primary {
+  background-color: white;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+.btn-primary:hover:not(:disabled) { background-color: #eff6ff; }
+
+.btn-success {
+  background-color: var(--success);
+  color: white;
+}
+.btn-success:hover:not(:disabled) { background-color: var(--success-hover); }
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #f1f5f9;
+  border-color: var(--border-color);
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .card-actions {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .qty-row {
+    justify-content: space-between;
+  }
+}
 </style>

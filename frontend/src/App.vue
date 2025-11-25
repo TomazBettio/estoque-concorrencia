@@ -1,36 +1,41 @@
 <template>
-  <div class="container">
-    <header>
-      <h1>🛒 Sistema de Compras (Teste Concorrência)</h1>
-      <p class="subtitle">Front-end Vue.js + API Node/Postgres</p>
-      
-      <div class="view-toggle">
-        <button 
-          :class="{ active: currentView === 'products' }" 
-          @click="currentView = 'products'"
-        >
-          Produtos
-        </button>
-        <button 
-          :class="{ active: currentView === 'orders' }" 
-          @click="currentView = 'orders'"
-        >
-          Pedidos
-        </button>
+  <div class="app-wrapper">
+    <header class="main-header">
+      <div class="header-content container">
+        <div class="brand">
+          <h1>ShopSystem</h1>
+        </div>
+        
+        <nav class="main-nav">
+          <button 
+            :class="['nav-btn', { active: currentView === 'products' }]" 
+            @click="currentView = 'products'"
+          >
+            Produtos
+          </button>
+          <button 
+            :class="['nav-btn', { active: currentView === 'orders' }]" 
+            @click="currentView = 'orders'"
+          >
+            Pedidos
+          </button>
+        </nav>
       </div>
     </header>
 
-    <NotificationBanner />
+    <main class="container main-content">
+      <NotificationBanner />
 
-    <div v-if="currentView === 'products'" class="grid">
-      <ProductCard 
-        v-for="product in products" 
-        :key="product.id" 
-        :product="product"
-      />
-    </div>
+      <div v-if="currentView === 'products'" class="products-list">
+        <ProductCard 
+          v-for="product in products" 
+          :key="product.id" 
+          :product="product"
+        />
+      </div>
 
-    <OrdersList v-else />
+      <OrdersList v-else />
+    </main>
     
     <Cart />
   </div>
@@ -57,44 +62,85 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 40px 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
+.app-wrapper {
+  min-height: 100vh;
+  background-color: var(--bg-body);
 }
 
-header { text-align: center; margin-bottom: 40px; }
-h1 { margin: 0; color: #2c3e50; }
-.subtitle { color: #7f8c8d; margin-top: 5px; }
+.main-header {
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
 
-.view-toggle {
-  margin-top: 20px;
+.header-content {
   display: flex;
-  justify-content: center;
-  gap: 7px;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
-.view-toggle button {
-  padding: 8px 16px;
-  border: 1px solid #ddd;
-  background: #fff;
-  cursor: pointer;
-  border-radius: 4px;
+.brand h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.025em;
+}
+
+.main-nav {
+  display: flex;
+  gap: 0.5rem;
+  background-color: #f1f5f9;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.nav-btn {
+  padding: 6px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
   font-weight: 500;
-  transition: all 0.2s;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.view-toggle button.active {
-  background: #2c3e50;
-  color: #fff;
-  border-color: #2c3e50;
+.nav-btn:hover {
+  color: var(--text-main);
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+.nav-btn.active {
+  background-color: white;
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .main-nav {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .nav-btn {
+    flex: 1;
+  }
 }
 </style>
