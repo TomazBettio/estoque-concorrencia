@@ -3,7 +3,7 @@
     <header class="main-header">
       <div class="header-content container">
         <div class="brand">
-          <h1>ShopSystem</h1>
+          <h1>Controle de Estoque</h1>
         </div>
         
         <nav class="main-nav">
