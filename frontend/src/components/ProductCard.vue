@@ -55,13 +55,10 @@ import { useCart } from '../composables/useCart'
 import { useOrders } from '../composables/useOrders'
 import { useProducts } from '../composables/useProducts'
 
+import type { Product } from '../types'
+
 const props = defineProps<{
-  product: {
-    id: number
-    name: string
-    stock: number
-    description?: string
-  }
+  product: Product
 }>()
 
 const emit = defineEmits<{

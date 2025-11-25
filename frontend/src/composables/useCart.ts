@@ -1,10 +1,6 @@
 import { ref, computed } from 'vue'
 
-export interface CartItem {
-  productId: number
-  name: string
-  quantity: number
-}
+import type { CartItem } from '../types'
 
 const items = ref<CartItem[]>([])
 

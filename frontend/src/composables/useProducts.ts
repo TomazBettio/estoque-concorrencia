@@ -2,7 +2,9 @@ import { ref } from 'vue'
 import { useNotifications } from './useNotifications'
 import { genericRequest } from '../utils/genericRequest'
 
-const products = ref<any[]>([])
+import type { Product } from '../types'
+
+const products = ref<Product[]>([])
 
 export function useProducts() {
   const { notify } = useNotifications()
@@ -17,7 +19,7 @@ export function useProducts() {
 
   const fetchProduct = async (id: number) => {
     try {
-      const updatedProduct = await genericRequest.get(`/products/${id}`)
+      const updatedProduct = await genericRequest.get<Product>(`/products/${id}`)
       
       const index = products.value.findIndex(p => p.id === id)
       if (index !== -1) {
@@ -28,11 +30,13 @@ export function useProducts() {
     }
   }
 
-  const buyProduct = async (product: any, quantity: number) => {
+  const buyProduct = async (product: Product, quantity: number): Promise<boolean> => {
     try {
       const result: any = await genericRequest.post('/orders', {
-        productId: product.id,
-        quantity: quantity
+        items: [{
+          productId: product.id,
+          quantity: quantity
+        }]
       })
 
       const orderId = result.order?.id || result.id; 

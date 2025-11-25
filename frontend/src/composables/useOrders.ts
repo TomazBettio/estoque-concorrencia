@@ -2,7 +2,9 @@ import { ref } from 'vue'
 import { genericRequest } from '../utils/genericRequest'
 import { useNotifications } from './useNotifications'
 
-const orders = ref<any[]>([])
+import type { Order, PaginatedResponse } from '../types'
+
+const orders = ref<Order[]>([])
 const currentPage = ref(1)
 const totalPages = ref(1)
 const limit = ref(10)
@@ -12,7 +14,7 @@ export function useOrders() {
 
   const fetchOrders = async (page = currentPage.value) => {
     try {
-      const response: any = await genericRequest.get(`/orders?page=${page}&limit=${limit.value}`)
+      const response = await genericRequest.get<PaginatedResponse<Order>>(`/orders?page=${page}&limit=${limit.value}`)
       orders.value = response.data
       currentPage.value = response.meta.page
       totalPages.value = response.meta.totalPages
@@ -33,7 +35,7 @@ export function useOrders() {
     }
   }
 
-  const createOrder = async (items: any[]) => {
+  const createOrder = async (items: { productId: number, quantity: number }[]) => {
     try {
       await genericRequest.post('/orders', { items })
       notify('Pedido realizado com sucesso.', 'success')
