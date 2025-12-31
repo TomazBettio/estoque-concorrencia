@@ -9,9 +9,9 @@ exports.seed = async function(knex) {
 
   // Insere os produtos iniciais
   await knex('products').insert([
-    { id: 1, name: 'Notebook Gamer', stock: 5, version: 1 },
-    { id: 2, name: 'Mouse Sem Fio', stock: 100, version: 1 },
-    { id: 3, name: 'Monitor 4K', stock: 0, version: 1 }
+    { id: 1, name: 'Notebook Gamer', description: 'Notebook otimo para jogos', stock: 5, version: 1 },
+    { id: 2, name: 'Mouse Sem Fio', description: 'Mouse ergonomico', stock: 100, version: 1 },
+    { id: 3, name: 'Monitor 4K', description: 'Monitor de alta resolução', stock: 0, version: 1 }
   ]);
 
   await knex.raw(`SELECT setval('products_id_seq', (SELECT MAX(id) FROM products))`);

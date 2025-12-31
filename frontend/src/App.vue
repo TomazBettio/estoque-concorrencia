@@ -1,24 +1,43 @@
 <template>
-  <div class="container">
-    <header>
-      <h1>🛒 Sistema de Compras (Teste Concorrência)</h1>
-      <p class="subtitle">Front-end Vue.js + API Node/SQLite</p>
+  <div class="app-wrapper">
+    <header class="main-header">
+      <div class="header-content container">
+        <div class="brand">
+          <h1>Controle de Estoque</h1>
+        </div>
+        
+        <nav class="main-nav">
+          <button 
+            :class="['nav-btn', { active: currentView === 'products' }]" 
+            @click="currentView = 'products'"
+          >
+            Produtos
+          </button>
+          <button 
+            :class="['nav-btn', { active: currentView === 'orders' }]" 
+            @click="currentView = 'orders'"
+          >
+            Pedidos
+          </button>
+        </nav>
+      </div>
     </header>
 
-    <NotificationBanner 
-      :message="notification.message" 
-      :type="notification.type" 
-      @clear="notification.message = ''"
-    />
+    <main class="container main-content">
+      <NotificationBanner />
 
-    <div class="grid">
-      <ProductCard 
-        v-for="product in products" 
-        :key="product.id" 
-        :product="product"
-        @buy="handleBuy"
-      />
-    </div>
+      <div v-if="currentView === 'products'" class="products-list">
+        <ProductCard 
+          v-for="product in products" 
+          :key="product.id" 
+          :product="product"
+        />
+      </div>
+
+      <OrdersList v-else />
+    </main>
+    
+    <Cart />
   </div>
 </template>
 
@@ -26,103 +45,102 @@
 import { ref, onMounted } from 'vue'
 import NotificationBanner from './components/NotificationBanner.vue'
 import ProductCard from './components/ProductCard.vue'
+import OrdersList from './components/OrdersList.vue'
+import Cart from './components/Cart.vue'
+import { useProducts } from './composables/useProducts'
+import { useOrders } from './composables/useOrders'
 
-const products = ref([])
-const notification = ref({ message: '', type: '' })
+const { products, fetchProducts } = useProducts()
+const { fetchOrders } = useOrders()
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
-
-const fetchProducts = async () => {
-  try {
-    const res = await fetch(`${API_URL}/products`)
-    const data = await res.json()
-    products.value = data
-  } catch (error) {
-    showNotification('Erro ao conectar com a API. O backend está rodando?', 'error')
-  }
-}
-
-// Função para comprar um produto
-const handleBuy = async ({ product, quantity }) => {
-  notification.value = { message: '', type: '' }
-
-  try {
-    const res = await fetch(`${API_URL}/orders`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        productId: product.id,
-        quantity: quantity
-      })
-    })
-
-    const result = await res.json()
-
-    if (res.ok) {
-      // O backend agora retorna { order: { id: ... } }
-      const orderId = result.order?.id || result.id; 
-      
-      showNotification(`Sucesso! Pedido #${orderId} criado.`, 'success')
-      await fetchProducts()
-    } else {
-      // TRATAMENTO DE ERROS (Zod + Regra de Negócio)
-      
-      let errorMsg = 'Erro ao processar pedido.';
-
-      // Se for erro do Zod (Validação de dados)
-      if (result.errors) {
-        // Pega a primeira mensagem de erro do Zod
-        errorMsg = `Dados inválidos: ${result.errors[0].message}`;
-      } 
-      // Se for erro de negócio (Estoque, Concorrência)
-      else if (result.error) {
-        errorMsg = result.error;
-      }
-
-      // Define o tipo de alerta visual
-      const type = res.status === 409 ? 'warning' : 'error';
-      
-      // Se for conflito (409), personaliza a mensagem
-      if (res.status === 409) {
-        errorMsg = 'ERRO DE CONCORRÊNCIA: Alguém comprou antes de você. O estoque foi atualizado.';
-      }
-
-      showNotification(errorMsg, type)
-      
-      // Atualiza a lista para ver o estoque real
-      await fetchProducts()
-    }
-
-  } catch (error) {
-    showNotification('Erro de rede ou servidor offline.', 'error')
-  }
-}
-
-const showNotification = (msg, type) => {
-  notification.value = { message: msg, type: type }
-}
+const currentView = ref('products')
 
 onMounted(() => {
   fetchProducts()
+  fetchOrders()
 })
 </script>
 
 <style scoped>
-.container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 40px 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
+.app-wrapper {
+  min-height: 100vh;
+  background-color: var(--bg-body);
 }
 
-header { text-align: center; margin-bottom: 40px; }
-h1 { margin: 0; color: #2c3e50; }
-.subtitle { color: #7f8c8d; margin-top: 5px; }
+.main-header {
+  background-color: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 20px;
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+
+.brand h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.025em;
+}
+
+.main-nav {
+  display: flex;
+  gap: 0.5rem;
+  background-color: #f1f5f9;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.nav-btn {
+  padding: 6px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nav-btn:hover {
+  color: var(--text-main);
+}
+
+.nav-btn.active {
+  background-color: white;
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 640px) {
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .main-nav {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .nav-btn {
+    flex: 1;
+  }
 }
 </style>

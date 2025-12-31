@@ -14,8 +14,10 @@ async function runTest() {
   // Não usamos 'await' aqui dentro para garantir que saiam todas "juntas"
   const requests = Array.from({ length: TOTAL_REQUESTS }).map((_, index) => {
     return axios.post(URL, {
-      productId: PRODUCT_ID,
-      quantity: QUANTITY
+      items: [{
+        productId: PRODUCT_ID,
+        quantity: QUANTITY
+      }]
     })
     .then(response => ({
       status: response.status,
